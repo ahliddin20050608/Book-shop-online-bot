@@ -10,3 +10,9 @@ register_kb = ReplyKeyboardMarkup(
     ], 
     resize_keyboard=True
 )
+phone_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="📞 Kontakt ulashish", request_contact=True)]
+    ], 
+    resize_keyboard=True
+)

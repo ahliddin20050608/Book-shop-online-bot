@@ -35,3 +35,6 @@ def create_table():
             dbc.execute(sql)
         db.commit()
 create_table()
+
+def save_user():
+    pass

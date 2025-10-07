@@ -14,3 +14,14 @@ Bu yerda sizni kutmoqda:
 
 📝 Botdan foydalanish uchun avval ro‘yxatdan o‘ting!
 """
+NAME_TEXT = """
+📖 Ro‘yxatdan o‘tishni boshlaymiz!  
+Iltimos, to‘liq ismingizni kiriting:  
+(Masalan: Dilshod Karimov)
+"""
+PHONE_TEXT = """
+📞 Ajoyib!  
+Buyurtmalarni tezkor yetkazib berish uchun telefon raqamingizni kiriting.  
+Masalan: +998901234567
+"""
+
