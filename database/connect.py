@@ -10,5 +10,5 @@ def get_connect():
         user = env.str("USER"),
         port = env.str("PORT"),
         host = env.str("HOST"),
-        passsword = env.str("PASSWORD")
+        password = env.str("PASSWORD")
     )

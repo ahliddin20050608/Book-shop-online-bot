@@ -17,7 +17,7 @@ def create_table():
             author VARCHAR(100) NOT NULL,
             genre VARCHAR(50),
             price BIGINT NOT NULL,
-            quantity BIGINT NOT NULL DEFAULT 1,
+            quantity BIGINT NOT NULL DEFAULT 1
         );
         CREATE TABLE IF NOT EXISTS orders(
             id BIGSERIAL PRIMARY KEY,
@@ -33,4 +33,5 @@ def create_table():
     with get_connect() as db:
         with db.cursor() as dbc:
             dbc.execute(sql)
+        db.commit()
 create_table()

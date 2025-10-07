@@ -1,8 +1,7 @@
 from aiogram import Bot, Dispatcher,F
 from aiogram.types import Message
-from aiogram.filters import Command, CommandStart
 from database import env
-
+from handler import user_router, admin_router
 import logging
 import asyncio
 
@@ -11,12 +10,14 @@ dp = Dispatcher()
 
 async def main():
     bot = Bot(token=TOKEN)
+    dp.include_router(user_router)
+    dp.include_router(admin_router)
     await dp.start_polling(bot)
 
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
-    asyncio.run(main=())
+
+    asyncio.run(main())
 
