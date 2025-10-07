@@ -1,0 +1,69 @@
+# ---- Python asosiy fayllar ----
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ---- Virtual environment ----
+env/
+venv/
+ENV/
+.venv/
+.ENV/
+
+# ---- OS / IDE fayllari ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ---- Log va vaqtinchalik fayllar ----
+*.log
+logs/
+*.tmp
+*.bak
+
+# ---- Local database fayllari ----
+*.sqlite3
+*.db
+
+# ---- Config va sirli fayllar ----
+.env
+*.env
+config.ini
+config.json
+settings.json
+
+# ---- Cache fayllar ----
+.cache/
+__pypackages__/
+*.egg-info/
+dist/
+build/
+
+# ---- Test va coverage fayllari ----
+.coverage
+.pytest_cache/
+htmlcov/
+
+# ---- Media / uploads (agar bo‘lsa) ----
+media/
+uploads/
+staticfiles/
+
+# ---- Docker (agar ishlatilsa) ----
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+
+# ---- AI / model fayllar ----
+*.model
+*.pkl
+*.h5
+
+# ---- Backup fayllar ----
+*.bak
+*.old
+*.orig
