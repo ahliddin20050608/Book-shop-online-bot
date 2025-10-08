@@ -1,41 +1,44 @@
-from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram import Router, F
-from buttons import REG_TEXT, NAME_TEXT, PHONE_TEXT
-from buttons import register_kb, phone_kb
-from aiogram.filters import Command, CommandStart
-from states import Register, FSMContext
-from filter import validate_fullname, validate_phone
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
+from buttons import menu_option_kb, search_inline_kb
+from buttons import MENU_TEXT, SEARCH_TEXT
+from aiogram.types import FSInputFile
+from database import find_books
+from states import SearchBook 
 user_router = Router()
-@user_router.message(CommandStart())
-async def start(message:Message):
-    await message.answer(text=REG_TEXT, reply_markup=register_kb)
 
 
-@user_router.message(F.text=="Ro'yxatdan o'tish")
-async def start_register(message:Message, state:FSMContext):
-    await state.set_state(Register.name)
-    await message.answer(text=NAME_TEXT, reply_markup=ReplyKeyboardRemove())
+@user_router.message(F.text=="📚 Menu")
+async def user_menu_handler(message:Message):
+    photo = "images/menu.webp"
 
+    await message.answer_photo(photo=FSInputFile(path=photo), caption=MENU_TEXT, reply_markup=menu_option_kb)
 
-@user_router.message(Register.name)
-async def get_name(message:Message, state:FSMContext):
-    if validate_fullname(message.text):
-        await state.update_data(name = message.text)
-        await state.set_state(Register.phone)
-        await message.answer(PHONE_TEXT, reply_markup=phone_kb)
+@user_router.message(F.text=="🔍 Search")
+async def search_choice(message:Message):
+    await  message.answer(text=SEARCH_TEXT, reply_markup=search_inline_kb)
+@user_router.callback_query(F.data.startswith("search"))
+async def search_query(call:CallbackQuery, state:FSMContext):
+    await state.set_state(SearchBook.search_name)
+    data = call.data.split("_")[-1]
+    await state.update_data(name = data)
+    await state.set_state(SearchBook.text)
+    if data !="back":
+        await call.message.answer(f"{data.title()} kiriting:")
     else:
-        await message.answer("Iltimos to'g'ri formatda kiriting: ")
+        await state.clear()
+        await call.message.edit_reply_markup(None)
+        photo = "images/menu.webp"
+        await call.message.answer_photo(photo=FSInputFile(path=photo), caption=MENU_TEXT, reply_markup=menu_option_kb)
 
-@user_router.message(Register.phone)
-async def get_phone(message:Message, state:FSMContext):
-    phone = None
-    if message.contact:
-       phone = message.contact.phone_number
+@user_router.message(SearchBook.text)
+async def get_search_books(message:Message,state:FSMContext):
+    search_name = await state.get_data()
+    search_name = search_name.get("name")
+    data = find_books(search_name, message.text)
+    if data :
+        pass
     else:
-        if validate_phone:
-            phone = message.text
-        else:
-            await message.answer("Iltimos to'g'ri formatda kiriting:")
-    if phone:
-        await state.update_data(phone=phone)
-        await message.answer("Hali ham ishlayabdi.")
+        await message.answer(f"{message.text} - bunday {search_name} bizda mavjud emas.")

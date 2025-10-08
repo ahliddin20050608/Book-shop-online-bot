@@ -36,5 +36,48 @@ def create_table():
         db.commit()
 create_table()
 
-def save_user():
-    pass
+def save_user(chat_id,fullname, phone, username=None):
+    sql = """
+    INSERT INTO users (chat_id, name, user_name, phone, is_admin)
+    VALUES (%s, %s, %s, %s, %s)
+    ON CONFLICT (chat_id) DO NOTHING;
+    """
+    try:
+        with get_connect() as db:
+            with db.cursor() as dbc:
+                dbc.execute(sql, (chat_id, fullname, phone, username))
+    except:
+        return None
+    return True
+
+
+def is_register_by_chat_id(chat_id: int) -> bool:
+    try:
+        sql = "SELECT * FROM users WHERE chat_id = %s;"
+
+        with get_connect() as db:
+            with db.cursor() as dbc:
+                dbc.execute(sql, (chat_id,))
+                return dbc.fetchone()
+    except:
+        return None
+
+
+def find_books(kind, text):
+    try:
+        sql = "SELECT * FROM users WHERE chat_id = %s;"
+
+        with get_connect() as db:
+            with db.cursor() as dbc:
+                if kind == "title":
+                    dbc.execute("SELECT * FROM books WHERE title ilike '%%s%'",(text))
+                elif kind == "genre":
+                    dbc.execute("SELECT * FROM books WHERE genre ilike '%%s%'",(text))
+                elif kind == "author":
+                    dbc.execute("SELECT * FROM books WHERE author ilike '%%s%'",(text))
+                else:
+                    return None
+                return dbc.fetchone()
+            
+    except:
+        return None
