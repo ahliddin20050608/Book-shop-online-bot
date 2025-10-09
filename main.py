@@ -1,9 +1,12 @@
-from aiogram import Bot, Dispatcher,F
+from aiogram import Bot, Dispatcher
 from aiogram.types import Message
-from database import env
 from handler import user_router, admin_router, register_router
 import logging
 import asyncio
+from environs import Env
+
+env = Env()
+env.read_env()
 
 TOKEN = env.str("TOKEN")
 dp = Dispatcher()
@@ -15,8 +18,6 @@ async def main():
     dp.include_router(register_router)
 
     await dp.start_polling(bot)
-
-
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

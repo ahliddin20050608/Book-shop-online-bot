@@ -1,83 +1,97 @@
+import sqlite3
 from .connect import get_connect
+
+
 def create_table():
     sql = """
-        CREATE TABLE IF NOT EXISTS users(
-            id BIGSERIAL PRIMARY KEY,
-            chat_id BIGINT NOT NULL UNIQUE,
-            name VARCHAR(100) NOT NULL,
-            user_name VARCHAR(100),
-            phone VARCHAR(50),
-            is_admin BOOL DEFAULT FALSE
-    
-        );
-        CREATE TABLE IF NOT EXISTS books(
-            id BIGSERIAL PRIMARY KEY,
-            title VARCHAR(150) NOT NULL,
-            description text,
-            author VARCHAR(100) NOT NULL,
-            genre VARCHAR(50),
-            price BIGINT NOT NULL,
-            quantity BIGINT NOT NULL DEFAULT 1
-        );
-        CREATE TABLE IF NOT EXISTS orders(
-            id BIGSERIAL PRIMARY KEY,
-            book_id BIGINT REFERENCES books(id),
-            user_id BIGINT REFERENCES users(id),
-            price BIGINT NOT NULL,
-            quantity BIGINT NOT NULL DEFAULT 1,
-            status VARCHAR(50) DEFAULT 'new',
-            create_at timestamp DEFAULT now()
-        );
+    CREATE TABLE IF NOT EXISTS users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        chat_id INTEGER NOT NULL UNIQUE,
+        name TEXT NOT NULL,
+        user_name TEXT,
+        phone TEXT,
+        is_admin INTEGER DEFAULT 0
+    );
 
-"""
+    CREATE TABLE IF NOT EXISTS books(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT,
+        author TEXT NOT NULL,
+        genre TEXT,
+        price INTEGER NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        image TEXT 
+    );
+
+    CREATE TABLE IF NOT EXISTS orders(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        book_id INTEGER,
+        user_id INTEGER,
+        price INTEGER NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        status TEXT DEFAULT 'new',
+        create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (book_id) REFERENCES books(id),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    """
     with get_connect() as db:
-        with db.cursor() as dbc:
-            dbc.execute(sql)
+        db.executescript(sql)
         db.commit()
+
 create_table()
 
-def save_user(chat_id,fullname, phone, username=None):
+
+def save_user(chat_id, fullname, phone, username=None, is_admin=0):
     sql = """
-    INSERT INTO users (chat_id, name, user_name, phone, is_admin)
-    VALUES (%s, %s, %s, %s, %s)
-    ON CONFLICT (chat_id) DO NOTHING;
+    INSERT OR IGNORE INTO users (chat_id, name, user_name, phone, is_admin)
+    VALUES (?, ?, ?, ?, ?);
     """
     try:
         with get_connect() as db:
-            with db.cursor() as dbc:
-                dbc.execute(sql, (chat_id, fullname, phone, username))
-    except:
-        return None
-    return True
-
-
-def is_register_by_chat_id(chat_id: int) -> bool:
-    try:
-        sql = "SELECT * FROM users WHERE chat_id = %s;"
-
-        with get_connect() as db:
-            with db.cursor() as dbc:
-                dbc.execute(sql, (chat_id,))
-                return dbc.fetchone()
-    except:
+            db.execute(sql, (chat_id, fullname, username, phone, is_admin))
+            db.commit()
+        return True
+    except Exception as e:
+        print("❌ save_user xatolik:", e)
         return None
 
 
-def find_books(kind, text):
+def is_register_by_chat_id(chat_id: int):
     try:
-        sql = "SELECT * FROM users WHERE chat_id = %s;"
-
+        sql = "SELECT * FROM users WHERE chat_id = ?;"
         with get_connect() as db:
-            with db.cursor() as dbc:
-                if kind == "title":
-                    dbc.execute("SELECT * FROM books WHERE title ilike '%%s%'",(text))
-                elif kind == "genre":
-                    dbc.execute("SELECT * FROM books WHERE genre ilike '%%s%'",(text))
-                elif kind == "author":
-                    dbc.execute("SELECT * FROM books WHERE author ilike '%%s%'",(text))
-                else:
-                    return None
-                return dbc.fetchone()
-            
-    except:
+            cur = db.execute(sql, (chat_id,))
+            return cur.fetchone()
+    except Exception as e:
+        print("❌ is_register_by_chat_id xatolik:", e)
+        return None
+
+
+def find_books(kind: str, text: str):
+    try:
+        with get_connect() as db:
+            if kind == "title":
+                cur = db.execute("SELECT id, title, author, genre FROM books WHERE title LIKE ?;", (f"%{text}%",))
+            elif kind == "genre":
+                cur = db.execute("SELECT id, title, author, genre FROM books WHERE genre LIKE ?;", (f"%{text}%",))
+            elif kind == "author":
+                cur = db.execute("SELECT id, title, author, genre FROM books WHERE author LIKE ?;", (f"%{text}%",))
+            else:
+                return []
+
+            return cur.fetchall()
+    except Exception as e:
+        print("❌ find_books xatolik:", e)
+        return []
+
+
+def find_by_books_id(book_id):
+    try:
+        with get_connect() as db:
+            cur = db.execute("SELECT id, title, author, genre FROM books WHERE id = ?;", (book_id,))
+            return cur.fetchone()
+    except Exception as e:
+        print("❌ find_by_books_id xatolik:", e)
         return None
