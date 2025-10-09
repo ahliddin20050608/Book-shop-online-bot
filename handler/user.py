@@ -100,7 +100,12 @@ async def get_checked_books(call: CallbackQuery):
             book_path = book[-1]
         else:
             book_path = "images/not_found_image.webp"
-        await call.message.answer_photo(photo=FSInputFile(path=book_path, caption=f"{book[1]}\n\n{book[2]}",reply_markup =(plus_minus_inline_button(book[0], count=1))))
+        await call.message.answer_photo(
+        photo=FSInputFile(path=book_path),
+        caption=f"{book[1]}\n\n{book[2]}",
+        reply_markup=plus_minus_inline_button(book[0], count=1)
+    )
+
 @user_router.callback_query(F.data.startswith("minus"))
 async def minus_button(call:CallbackQuery):
         for i in CHECKED_BOOKS:
