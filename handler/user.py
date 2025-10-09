@@ -113,30 +113,46 @@ async def get_checked_books(call: CallbackQuery):
         )
 
 # ====================== MINUS BUTTON ======================
-# MINUS tugma
+# MINUS BUTTON
 @user_router.callback_query(F.data.startswith("minus"))
 async def minus_button(call: CallbackQuery):
-    for i in CHECKED_BOOKS:
-        book = find_by_books_id(i)
-    if  int(book[0]) == int(call.data.split("_")[-1]):
-        count = int(call.data.split("_")[1])
-        if count < 1:
-            await call.message.answer("Kamaytirish mumkin emas.")  
+    data = call.data.split("_")
+    if len(data) != 3:
+        await call.message.answer("Xato: noto‘g‘ri callback data.")
+        return
 
-        else:
-            count -= 1
-        await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book[0], count))
+    count = int(data[1])
+    book_id = int(data[2])
+    book = find_by_books_id(book_id)
 
-# PLUS tugma
+    if count <= 1:
+        await call.message.answer("Kamaytirish mumkin emas.")
+        count = 1
+    else:
+        count -= 1
+
+    await call.message.edit_reply_markup(
+        reply_markup=plus_minus_inline_button(book_id, count)
+    )
+
+# PLUS BUTTON
 @user_router.callback_query(F.data.startswith("plus"))
 async def plus_button(call: CallbackQuery):
-    for i in CHECKED_BOOKS:
-        book = find_by_books_id(i)
-    if  int(book[0]) == int(call.data.split("_")[-1]):
+    data = call.data.split("_")
+    if len(data) != 3:
+        await call.message.answer("Xato: noto‘g‘ri callback data.")
+        return
 
-        count = int(call.data.split("_")[1])
-        if count > 10:
-            await call.message.answer("10 tadan ortiq yuborish mumkin emas.")
-        else:
-            count += 1
-        await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book[0], count))
+    count = int(data[1])
+    book_id = int(data[2])
+    book = find_by_books_id(book_id)
+
+    if count >= 10:
+        await call.message.answer("10 tadan ortiq yuborish mumkin emas.")
+        count = 10
+    else:
+        count += 1
+
+    await call.message.edit_reply_markup(
+        reply_markup=plus_minus_inline_button(book_id, count)
+    )
