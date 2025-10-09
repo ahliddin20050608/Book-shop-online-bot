@@ -45,10 +45,7 @@ build/
 .pytest_cache/
 htmlcov/
 
-# ---- Media / uploads (agar bo‘lsa) ----
-media/
-uploads/
-staticfiles/
+
 
 # ---- Docker (agar ishlatilsa) ----
 *.pid
