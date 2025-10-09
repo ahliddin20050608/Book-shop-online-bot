@@ -98,7 +98,7 @@ async def get_checked_books(call: CallbackQuery):
 
         if book[-1]:
             book_path = book["image"]
-        else:
+        else:   
             book_path = "images/not_found_image.webp"
         await call.message.answer_photo(
         photo=FSInputFile(path=book_path),

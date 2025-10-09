@@ -69,19 +69,14 @@ def is_register_by_chat_id(chat_id: int):
         return None
 
 
-def find_books(kind: str, text: str):
+def find_by_books_id(book_id):
     try:
         with get_connect() as db:
-            if kind == "title":
-                cur = db.execute("SELECT id, title, author, genre FROM books WHERE title LIKE ?;", (f"%{text}%",))
-            elif kind == "genre":
-                cur = db.execute("SELECT id, title, author, genre FROM books WHERE genre LIKE ?;", (f"%{text}%",))
-            elif kind == "author":
-                cur = db.execute("SELECT id, title, author, genre FROM books WHERE author LIKE ?;", (f"%{text}%",))
-            else:
-                return []
-
-            return cur.fetchall()
+            cur = db.execute("SELECT * FROM books WHERE id = ?;", (book_id,))
+            return cur.fetchone()  # endi book["image"] ishlaydi
+    except sqlite3.Error as e:
+        print("❌ find_by_books_id xatolik:", e)
+        return None
     except Exception as e:
         print("❌ find_books xatolik:", e)
         return []
