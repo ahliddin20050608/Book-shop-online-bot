@@ -91,7 +91,6 @@ async def next_page_book(call:CallbackQuery):
 async def get_checked_books(call:CallbackQuery):
     book_id = int(call.data.split("_")[-1])
     CHECKED_BOOKS.append(book_id)
-
 @user_router.callback_query(F.data.startswith("send_books"))
 async def get_checked_books(call: CallbackQuery):
     if not CHECKED_BOOKS:
@@ -107,28 +106,25 @@ async def get_checked_books(call: CallbackQuery):
         title = book[1] or "Noma’lum kitob"
         author = book[2] or "Muallif ko‘rsatilmagan"
         description = book[3] or "Tavsif mavjud emas"
-        price = book[4] if len(book) > 4 else "Narx ko‘rsatilmagan"
-        image_path = book[-1] if len(book) > 5 else None
+        price = "⏳ Tez kunda"  # Agar narx bo‘lmasa
+        image_path = "images/not_found_image.webp"
 
         # Rasmni tekshiramiz
-        if image_path and os.path.exists(image_path):
-            book_path = image_path
-        else:
-            book_path = "images/not_found_image.webp"
+        if len(book) > 4 and book[-1] and os.path.exists(book[-1]):
+            image_path = book[-1]
 
-        # Chiroyli, HTMLsiz caption
+        # Chiroyli caption
         caption = (
-            f"📚 *{title}*\n"
-            f"👤 Muallif: {author}\n"
+            f"📖 *{title}*\n"
+            f"👨‍💼 Muallif: {author}\n"
             f"📝 Tavsif: {description}\n"
-            f"💰 Narx: {price} so'm\n"
-            f"──────────────────────"
+            f"💰 Narx: {price}\n"
+            f"────────────────────────"
         )
 
         await call.message.answer_photo(
-            photo=FSInputFile(path=book_path),
+            photo=FSInputFile(path=image_path),
             caption=caption,
             reply_markup=plus_minus_inline_button(book_id=book_id, count=1)
         )
 
-   
