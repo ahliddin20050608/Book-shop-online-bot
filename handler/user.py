@@ -116,29 +116,27 @@ async def get_checked_books(call: CallbackQuery):
 # MINUS tugma
 @user_router.callback_query(F.data.startswith("minus"))
 async def minus_button(call: CallbackQuery):
-    data = call.data.split("_")  # format: minus_count_bookid
-    count = int(data[1])
-    book_id = int(data[2])
+    for i in CHECKED_BOOKS:
+        book = find_by_books_id(i)
+    if  int(book[0]) == int(call.data.split("_")[-1]):
+        count = int(call.data.split("_")[1])
+        if count < 1:
+            await call.message.answer("Kamaytirish mumkin emas.")  
 
-    if count > 1:
-        count -= 1
-    else:
-        await call.answer("Kamaytirish mumkin emas.", show_alert=True)
-        count = 1
-
-    await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book_id, count))
+        else:
+            count -= 1
+        await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book[0], count))
 
 # PLUS tugma
 @user_router.callback_query(F.data.startswith("plus"))
 async def plus_button(call: CallbackQuery):
-    data = call.data.split("_")  # format: plus_count_bookid
-    count = int(data[1])
-    book_id = int(data[2])
+    for i in CHECKED_BOOKS:
+        book = find_by_books_id(i)
+    if  int(book[0]) == int(call.data.split("_")[-1]):
 
-    if count < 10:
-        count += 1
-    else:
-        await call.answer("10 tadan ortiq yuborish mumkin emas.", show_alert=True)
-        count = 10
-
-    await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book_id, count))
+        count = int(call.data.split("_")[1])
+        if count > 10:
+            await call.message.answer("10 tadan ortiq yuborish mumkin emas.")
+        else:
+            count += 1
+        await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book[0], count))
