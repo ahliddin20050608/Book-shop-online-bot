@@ -102,7 +102,7 @@ async def get_checked_books(call:CallbackQuery):
         if book[-1]:
             book_path = book[-1]
         else:
-            book_path ="images/not_found_image"
+            book_path ="images/not_found_image.webp"
 
         await call.message.answer_photo(photo=FSInputFile(path=book_path), caption=f"{book[1]}\n\n{book[2]}", reply_markup=plus_minus_inline_button(book_id=book[0], count=1))
           
