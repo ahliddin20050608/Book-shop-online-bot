@@ -91,78 +91,57 @@ async def next_page_book(call:CallbackQuery):
 async def get_checked_books(call:CallbackQuery):
     book_id = int(call.data.split("_")[-1])
     CHECKED_BOOKS.append(book_id)
+
+
 @user_router.callback_query(F.data.startswith("send_books"))
 async def get_checked_books(call: CallbackQuery):
-    if not CHECKED_BOOKS:
-        await call.message.answer("📚 Hech qanday kitob tanlanmagan.")
-        return
-
     for i in CHECKED_BOOKS:
         book = find_by_books_id(i)
-        if not book:
-            continue  # Agar topilmasa keyingisiga o'tadi
-
-        # Fayl yo‘li
+        
+        # Rasm faylini tayyorlash
         file_name = book[-1] if len(book) > 4 and book[-1] else None
         book_path = os.path.join("images", file_name) if file_name else "images/not_found_image.webp"
-
-        # Agar rasm mavjud bo‘lmasa, defaultni ishlatamiz
+        
+        # Fayl mavjudligini tekshirish
         if not os.path.exists(book_path):
             book_path = "images/not_found_image.webp"
-
-        # Rasmni yuborish
+        
         await call.message.answer_photo(
             photo=FSInputFile(path=book_path),
-            caption=f"📖 {book[1]}\n\n📝 {book[2]}",
+            caption=f"📖 {book[1] or 'Noma’lum kitob'}\n👨‍💼 {book[2] or 'Muallif ko‘rsatilmagan'}\n📝 {book[3] or 'Tavsif mavjud emas'}",
             reply_markup=plus_minus_inline_button(book[0], count=1)
         )
 
-
-# ➖ Minus tugmasi
-@user_router.callback_query(F.data.startswith("minus_"))
+# ====================== MINUS BUTTON ======================
+@user_router.callback_query(F.data.startswith("minus"))
 async def minus_button(call: CallbackQuery):
-    data_parts = call.data.split("_")
-    if len(data_parts) < 3:
-        return  # noto‘g‘ri formatdagi callback
-
-    count = int(data_parts[1])
-    book_id = int(data_parts[-1])
-
     for i in CHECKED_BOOKS:
         book = find_by_books_id(i)
-        if not book:
-            continue
-        if int(book[0]) == book_id:
-            if count <= 1:
-                await call.answer("❗️Kamaytirish mumkin emas.", show_alert=True)
-                return
+    
+    book_id = int(call.data.split("_")[-1])
+    count = int(call.data.split("_")[1])
+    
+    if book[0] == book_id:
+        if count <= 1:
+            await call.answer("Kamaytirish mumkin emas.", show_alert=True)
+            count = 1
+        else:
             count -= 1
-            await call.message.edit_reply_markup(
-                reply_markup=plus_minus_inline_button(book[0], count)
-            )
-            break
+        await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book[0], count))
 
-
-# ➕ Plus tugmasi
-@user_router.callback_query(F.data.startswith("plus_"))
+# ====================== PLUS BUTTON ======================
+@user_router.callback_query(F.data.startswith("plus"))
 async def plus_button(call: CallbackQuery):
-    data_parts = call.data.split("_")
-    if len(data_parts) < 3:
-        return  # noto‘g‘ri formatdagi callback
-
-    count = int(data_parts[1])
-    book_id = int(data_parts[-1])
-
     for i in CHECKED_BOOKS:
         book = find_by_books_id(i)
-        if not book:
-            continue
-        if int(book[0]) == book_id:
-            if count >= 10:
-                await call.answer("❗️10 tadan ortiq yuborish mumkin emas.", show_alert=True)
-                return
+    
+    book_id = int(call.data.split("_")[-1])
+    count = int(call.data.split("_")[1])
+    
+    if book[0] == book_id:
+        if count >= 10:
+            await call.answer("10 tadan ortiq yuborish mumkin emas.", show_alert=True)
+            count = 10
+        else:
             count += 1
-            await call.message.edit_reply_markup(
-                reply_markup=plus_minus_inline_button(book[0], count)
-            )
-            break
+        await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book[0], count))
