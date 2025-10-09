@@ -97,7 +97,7 @@ async def get_checked_books(call: CallbackQuery):
             book = find_by_books_id(i)
 
         if book[-1]:
-            book_path = book[-1]
+            book_path = book["image"]
         else:
             book_path = "images/not_found_image.webp"
         await call.message.answer_photo(
