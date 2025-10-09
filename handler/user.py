@@ -96,16 +96,15 @@ async def get_checked_books(call:CallbackQuery):
 
 @user_router.callback_query(F.data.startswith("send_books"))
 async def get_checked_books(call:CallbackQuery):
-    full_text = "Siz ushbu kitoblarni tanladingiz:\n "
-
-
-
-    c = 1
+    
     for i in CHECKED_BOOKS:
         book = find_by_books_id(i)
-        pass
-        full_text += f"{c}. {book[1]}\n\n"
-        c += 1
-    await call.message.answer(f"{full_text}")
-     
+        if book[-1]:
+            book_path = book[-1]
+        else:
+            book_path ="images/not_found_image"
 
+        await call.message.answer_photo(photo=FSInputFile(path=book_path), caption=f"{book[1]}\n\n{book[2]}\n\nprice: {book[5]}", reply_markup=plus_minus_inline_button(book_id=book[0]))
+          
+      
+   
