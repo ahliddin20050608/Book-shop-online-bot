@@ -101,10 +101,10 @@ async def get_checked_books(call: CallbackQuery):
         else:
             book_path = "images/not_found_image.webp"
         await call.message.answer_photo(
-            photo=FSInputFile(path=book_path),
-            caption=f"{book[1]}\n\n{book[2]}",
-            reply_markup=plus_minus_inline_button(book[0], count=1)
-        )
+        photo=FSInputFile(path=book_path),   # FSInputFile faqat fayl yo‘lini oladi
+        caption=f"{book[1]}\n\n{book[2]}",  # caption alohida argument sifatida
+        reply_markup=plus_minus_inline_button(book[0], count=1))
+
 
 @user_router.callback_query(F.data.startswith("minus"))
 async def minus_button(call:CallbackQuery):
@@ -122,7 +122,7 @@ async def minus_button(call:CallbackQuery):
         for i in CHECKED_BOOKS:
             book = find_by_books_id(i)
         if int(book[0]) == int(call.data.split("_")[-1]):
-            count = call.data.split("_")[1]
+            count = int(call.data.split("_")[1])
             if count > 10:
                 await call.message.answer("10 tadan ortiq yuborih mumkin emas.")
             else:
