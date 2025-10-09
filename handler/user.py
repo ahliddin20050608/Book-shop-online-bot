@@ -93,41 +93,42 @@ async def get_checked_books(call:CallbackQuery):
     CHECKED_BOOKS.append(book_id)
 @user_router.callback_query(F.data.startswith("send_books"))
 async def get_checked_books(call: CallbackQuery):
-        for i in CHECKED_BOOKS:
-            book = find_by_books_id(i)
+    if not CHECKED_BOOKS:
+        await call.message.answer("📚 Hech qanday kitob tanlanmagan.")
+        return
 
-        if book[-1]:
-            book_path = book["image"]
-        else:   
-            book_path = "images/not_found_image.webp"
+    for book_id in CHECKED_BOOKS:
+        book = find_by_books_id(book_id)
+        book_path = book[-1] if book[-1] else "images/not_found_image.webp"
+        
         await call.message.answer_photo(
-        photo=FSInputFile(path=book_path),
-        caption=f"{book[1]}\n\n{book[2]}",
-        reply_markup=plus_minus_inline_button(book[0], count=1)
-    )
+            photo=FSInputFile(book_path),
+            caption=f"{book[1]}\n\n{book[2]}",
+            reply_markup=plus_minus_inline_button(book[0], count=1)
+        )
 
 @user_router.callback_query(F.data.startswith("minus"))
-async def minus_button(call:CallbackQuery):
-        for i in CHECKED_BOOKS:
-            book = find_by_books_id(i)
-        if int(book[0]) == int(call.data.split("_")[-1]):
-            count = int(call.data.split("_")[1])
-            if count < 1:
-                await call.message.answer("Kamaytirish mumkin emas.")
-            else:
-                count -= 1
-            await call.message.edit_reply_markup(reply_markup =(plus_minus_inline_button(book[0], count)))
-@user_router.callback_query(F.data.startswith("plus"))
-async def minus_button(call:CallbackQuery):
-        for i in CHECKED_BOOKS:
-            book = find_by_books_id(i)
-        if int(book[0]) == int(call.data.split("_")[-1]):
-            count = int(call.data.split("_")[1])
-            if count > 10:
-                 call.message.answer("10 tadan ortiq yuborish mumkin emas.")
-            else:
-                count -= 1
-            await call.message.edit_reply_markup(reply_markup =(plus_minus_inline_button(book[0], count)))
+async def minus_button(call: CallbackQuery):
+    book_id = int(call.data.split("_")[-1])
+    count = int(call.data.split("_")[1])
+    
+    if count <= 1:
+        await call.message.answer("Kamaytirish mumkin emas.")
+    else:
+        count -= 1
+        await call.message.edit_reply_markup(
+            reply_markup=plus_minus_inline_button(book_id, count)
+        )
 
-        
-        
+@user_router.callback_query(F.data.startswith("plus"))
+async def plus_button(call: CallbackQuery):
+    book_id = int(call.data.split("_")[-1])
+    count = int(call.data.split("_")[1])
+    
+    if count >= 10:
+        await call.message.answer("10 tadan ortiq yuborish mumkin emas.")
+    else:
+        count += 1
+        await call.message.edit_reply_markup(
+            reply_markup=plus_minus_inline_button(book_id, count)
+        )
