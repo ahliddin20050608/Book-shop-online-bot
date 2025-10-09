@@ -95,11 +95,14 @@ async def get_checked_books(call:CallbackQuery):
 
 @user_router.callback_query(F.data.startswith("send_books"))
 async def get_checked_books(call: CallbackQuery):
+    if not CHECKED_BOOKS:
+        await call.message.answer("Hech qanday kitob tanlanmagan.")
+        return
+
     for i in CHECKED_BOOKS:
         book = find_by_books_id(i)
-        print(book)  # Debug uchun
+        print(book)
 
-        # Fayl mavjudligini tekshiramiz
         if book[-1] and os.path.exists(book[-1]):
             book_path = book[-1]
         else:
@@ -107,8 +110,9 @@ async def get_checked_books(call: CallbackQuery):
 
         await call.message.answer_photo(
             photo=FSInputFile(path=book_path),
-            caption=f"{book[1]}\n\n{book[2]}\n\n{book[3]}",
+            caption=f"📖 <b>{book[1]}</b>\n\n{book[2]}\n\n📝 {book[3]}",
+            parse_mode="HTML",
             reply_markup=plus_minus_inline_button(book_id=book[0], count=1)
         )
-    
+
    
