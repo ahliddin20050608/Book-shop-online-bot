@@ -93,38 +93,44 @@ async def get_checked_books(call:CallbackQuery):
     CHECKED_BOOKS.append(book_id)
 @user_router.callback_query(F.data.startswith("send_books"))
 async def get_checked_books(call: CallbackQuery):
-    if not CHECKED_BOOKS:
-        await call.message.answer("📚 Hech qanday kitob tanlanmagan.")
-        return
+        for i in CHECKED_BOOKS:
+            book = find_by_books_id(i)
 
-    for i in CHECKED_BOOKS:
-        book = find_by_books_id(i)
-        print(book)
+        if book[-1]:
+            book_path = book[-1]
+        else:
+            book_path = "images/not_found_image.webp"
+        await call.message.answer_photo(photo=FSInputFile(path=book_path, caption=f"{book[1]}\n\n{book[2]}",reply_markup =(plus_minus_inline_button(book[0], count=1))))
+@user_router.callback_query(F.data.startswith("minus"))
+async def minus_button(call:CallbackQuery):
+        for i in CHECKED_BOOKS:
+            book = find_by_books_id(i)
+        if int(book[0]) == int(call.data.split("_")[-1]):
+            if book[-1]:
+                book_path = book[-1]
+            else:
+                book_path = "images/not_found_image.webp"
+            count = call.data.split("_")[1]
+            if count < 1:
+                await call.message.answer("Kamaytirish mumkin emas.")
+            else:
+                count -= 1
+            await call.message.answer_photo(photo=FSInputFile(path=book_path, caption=f"{book[1]}\n\n{book[2]}",reply_markup =(plus_minus_inline_button(book[0], count))))
+@user_router.callback_query(F.data.startswith("plus"))
+async def minus_button(call:CallbackQuery):
+        for i in CHECKED_BOOKS:
+            book = find_by_books_id(i)
+        if int(book[0]) == int(call.data.split("_")[-1]):
+            if book[-1]:
+                book_path = book[-1]
+            else:
+                book_path = "images/not_found_image.webp"
+            count = call.data.split("_")[1]
+            if count > 10:
+                await call.message.answer("10 tadan ortiq yuborih mumkin emas.")
+            else:
+                count += 1
+            await call.message.answer_photo(photo=FSInputFile(path=book_path, caption=f"{book[1]}\n\n{book[2]}",reply_markup =(plus_minus_inline_button(book[0], count))))
 
-        # Ma'lumotlarni ajratamiz
-        book_id = book[0]
-        title = book[1] or "Noma’lum kitob"
-        author = book[2] or "Muallif ko‘rsatilmagan"
-        description = book[3] or "Tavsif mavjud emas"
-        price = "⏳ Tez kunda"  # Agar narx bo‘lmasa
-        image_path = "images/not_found_image.webp"
-
-        # Rasmni tekshiramiz
-        if len(book) > 4 and book[-1] and os.path.exists(book[-1]):
-            image_path = book[-1]
-
-        # Chiroyli caption
-        caption = (
-            f"📖 *{title}*\n"
-            f"👨‍💼 Muallif: {author}\n"
-            f"📝 Tavsif: {description}\n"
-            f"💰 Narx: {price}\n"
-            f"────────────────────────"
-        )
-
-        await call.message.answer_photo(
-            photo=FSInputFile(path=image_path),
-            caption=caption,
-            reply_markup=plus_minus_inline_button(book_id=book_id, count=1)
-        )
-
+        
+        

@@ -119,7 +119,7 @@ def get_pagination_button(data, page: int, search_name: str, text: str):
 
 
 
-def plus_minus_inline_button(book_id,count):
+def plus_minus_inline_button(book_id,count=1):
     buttons = InlineKeyboardMarkup(
 
         inline_keyboard=[
