@@ -118,15 +118,16 @@ async def minus_button(call: CallbackQuery):
         count = int(count)
         book_id = int(book_id)
     except ValueError:
-        # hech qanday xabar chiqarma, shunchaki chiq
-        return
+        return  # Xato bo‘lsa, jim chiqamiz
 
+    # 1 dan kichraymasin
     if count > 1:
         count -= 1
 
     await call.message.edit_reply_markup(
         reply_markup=plus_minus_inline_button(book_id, count)
     )
+    await call.answer()  # Loading effektni yopish uchun
 
 
 # ======================================================
@@ -138,12 +139,13 @@ async def plus_button(call: CallbackQuery):
         count = int(count)
         book_id = int(book_id)
     except ValueError:
-        # hech qanday xabar chiqarma
-        return
+        return  # Xato bo‘lsa, jim chiqamiz
 
+    # 10 dan oshmasin
     if count < 10:
         count += 1
 
     await call.message.edit_reply_markup(
         reply_markup=plus_minus_inline_button(book_id, count)
     )
+    await call.answer()
