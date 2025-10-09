@@ -50,12 +50,14 @@ def save_user(chat_id, fullname, phone, username=None, is_admin=0):
     """
     try:
         with get_connect() as db:
+            # to'g'ri ketma-ketlik: chat_id, name, user_name, phone, is_admin
             db.execute(sql, (chat_id, fullname, username, phone, is_admin))
             db.commit()
         return True
     except Exception as e:
         print("❌ save_user xatolik:", e)
         return None
+
 
 
 def is_register_by_chat_id(chat_id: int):
