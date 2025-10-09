@@ -111,7 +111,6 @@ async def get_checked_books(call: CallbackQuery):
             caption=f"📖 {book[1] or 'Noma’lum kitob'}\n👨‍💼 {book[2] or 'Muallif ko‘rsatilmagan'}\n📝 {book[3] or 'Tavsif mavjud emas'}",
             reply_markup=plus_minus_inline_button(book[0], count=1)
         )
-
 @user_router.callback_query(F.data.startswith("minus_"))
 async def minus_button(call: CallbackQuery):
     try:
@@ -119,19 +118,19 @@ async def minus_button(call: CallbackQuery):
         count = int(count)
         book_id = int(book_id)
     except ValueError:
-        await call.answer("⚠️ Callback ma'lumot noto‘g‘ri.")
+        # hech qanday xabar chiqarma, shunchaki chiq
         return
 
-    if count <= 1:
-        await call.answer("Kamaytirish mumkin emas ❌", show_alert=True)
-        return
+    if count > 1:
+        count -= 1
 
-    count -= 1
-    await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book_id, count))
+    await call.message.edit_reply_markup(
+        reply_markup=plus_minus_inline_button(book_id, count)
+    )
 
 
 # ======================================================
-# ➕ plus tugma
+# ➕ Plus tugma
 @user_router.callback_query(F.data.startswith("plus_"))
 async def plus_button(call: CallbackQuery):
     try:
@@ -139,12 +138,12 @@ async def plus_button(call: CallbackQuery):
         count = int(count)
         book_id = int(book_id)
     except ValueError:
-        await call.answer("⚠️ Callback ma'lumot noto‘g‘ri.")
+        # hech qanday xabar chiqarma
         return
 
-    if count >= 10:
-        await call.answer("10 tadan ortiq bo‘lmaydi 🚫", show_alert=True)
-        return
+    if count < 10:
+        count += 1
 
-    count += 1
-    await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book_id, count))
+    await call.message.edit_reply_markup(
+        reply_markup=plus_minus_inline_button(book_id, count)
+    )
