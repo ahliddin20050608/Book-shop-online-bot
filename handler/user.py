@@ -118,20 +118,17 @@ async def minus_button(call: CallbackQuery):
         count = int(count)
         book_id = int(book_id)
     except ValueError:
-        return  # Xato bo‘lsa, jim chiqamiz
+        return  
 
-    # 1 dan kichraymasin
     if count > 1:
         count -= 1
 
     await call.message.edit_reply_markup(
         reply_markup=plus_minus_inline_button(book_id, count)
     )
-    await call.answer()  # Loading effektni yopish uchun
+    await call.answer()  
 
 
-# ======================================================
-# ➕ Plus tugma
 @user_router.callback_query(F.data.startswith("plus_"))
 async def plus_button(call: CallbackQuery):
     try:
@@ -139,9 +136,8 @@ async def plus_button(call: CallbackQuery):
         count = int(count)
         book_id = int(book_id)
     except ValueError:
-        return  # Xato bo‘lsa, jim chiqamiz
+        return  
 
-    # 10 dan oshmasin
     if count < 10:
         count += 1
 
