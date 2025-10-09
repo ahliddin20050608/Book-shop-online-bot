@@ -112,30 +112,39 @@ async def get_checked_books(call: CallbackQuery):
             reply_markup=plus_minus_inline_button(book[0], count=1)
         )
 
-# ====================== MINUS BUTTON ======================
-# MINUS tugma
-@user_router.callback_query(F.data.startswith("minus"))
+@user_router.callback_query(F.data.startswith("minus_"))
 async def minus_button(call: CallbackQuery):
-    for i in CHECKED_BOOKS:
-        book = find_by_books_id(i)
-    if  int(book[0]) == int(call.data.split("_")[-1]):
-        count = int(call.data.split("_")[1])
-        if count < 1:
-            await call.message.answer("Kamaytirish mumkin emas.")  
-        else:
-            count -= 1
-        await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book[0], count))
+    try:
+        _, count, book_id = call.data.split("_")
+        count = int(count)
+        book_id = int(book_id)
+    except ValueError:
+        await call.answer("⚠️ Callback ma'lumot noto‘g‘ri.")
+        return
 
-# PLUS tugma
-@user_router.callback_query(F.data.startswith("plus"))
+    if count <= 1:
+        await call.answer("Kamaytirish mumkin emas ❌", show_alert=True)
+        return
+
+    count -= 1
+    await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book_id, count))
+
+
+# ======================================================
+# ➕ plus tugma
+@user_router.callback_query(F.data.startswith("plus_"))
 async def plus_button(call: CallbackQuery):
-    for i in CHECKED_BOOKS:
-        book = find_by_books_id(i)
-    if  int(book[0]) == int(call.data.split("_")[-1]):
+    try:
+        _, count, book_id = call.data.split("_")
+        count = int(count)
+        book_id = int(book_id)
+    except ValueError:
+        await call.answer("⚠️ Callback ma'lumot noto‘g‘ri.")
+        return
 
-        count = int(call.data.split("_")[1])
-        if count > 10:
-            await call.message.answer("10 tadan ortiq yuborish mumkin emas.")
-        else:
-            count += 1
-        await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book[0], count))
+    if count >= 10:
+        await call.answer("10 tadan ortiq bo‘lmaydi 🚫", show_alert=True)
+        return
+
+    count += 1
+    await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book_id, count))
