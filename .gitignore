@@ -24,9 +24,7 @@ logs/
 *.tmp
 *.bak
 
-# ---- Local database fayllari ----
-*.sqlite3
-*.db
+
 
 # ---- Config va sirli fayllar ----
 .env

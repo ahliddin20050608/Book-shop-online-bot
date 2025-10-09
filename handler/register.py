@@ -4,6 +4,7 @@ from buttons import REG_TEXT, NAME_TEXT, PHONE_TEXT, SUCCESS_REG_TEXT,MAIN_TEXT
 from buttons import register_kb, phone_kb,menu_kb
 from aiogram.filters import Command, CommandStart
 from database import is_register_by_chat_id
+from database import save_user
 from states import Register, FSMContext
 from filter import validate_fullname, validate_phone
 from aiogram.types import FSInputFile
@@ -18,7 +19,6 @@ async def start(message:Message):
 
     if registrated:
         await message.answer_photo(photo=FSInputFile(path=photo_path), caption=MAIN_TEXT, reply_markup= menu_kb)
-        await message.answer(text=MAIN_TEXT, reply_markup=register_kb)
     else:
         await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup= register_kb)
 
@@ -43,10 +43,18 @@ async def get_phone(message:Message, state:FSMContext):
     if message.contact:
        phone = message.contact.phone_number
     else:
-        if validate_phone:
+        if validate_phone(message.text):
             phone = message.text
         else:
-            await message.answer("Iltimos to'g'ri formatda kiriting:")
+            await message.answer("Iltimos, to‘g‘ri telefon raqam kiriting.")
     if phone:
-        await state.update_data(phone=phone)
+        data = await state.get_data()
+        fullname = data.get("name")
+        save_user(
+            chat_id=message.from_user.id,
+            fullname=fullname,
+            phone=phone,
+            username=message.from_user.username
+        )
         await message.answer(text=SUCCESS_REG_TEXT, reply_markup=menu_kb)
+        await state.clear()
