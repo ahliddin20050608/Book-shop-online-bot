@@ -95,11 +95,9 @@ async def get_checked_books(call:CallbackQuery):
 async def get_checked_books(call: CallbackQuery):
         for i in CHECKED_BOOKS:
             book = find_by_books_id(i)
-
-        if book[-1]:
-            book_path = book[-1]
-        else:
-            book_path = "images/not_found_image.webp"
+        
+        
+        book_path =book_path = os.path.join("images", book[-1]) if book[-1] else "images/not_found_image.webp"
         await call.message.answer_photo(
         photo=FSInputFile(path=book_path),   # FSInputFile faqat fayl yo‘lini oladi
         caption=f"{book[1]}\n\n{book[2]}",  # caption alohida argument sifatida
