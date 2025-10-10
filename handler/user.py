@@ -182,6 +182,21 @@ async def plus_button(call: CallbackQuery):
     await call.message.edit_reply_markup(
         reply_markup=plus_minus_inline_button(book_id, count)
     )
+
+
+
+@user_router.callback_query(F.data.startswith("delete_"))
+async def cancel_button(call:CallbackQuery): 
+    data = call.data.split("_")
+    count = int(data[1])       
+    book_id = int(data[2])   
+    for i in CHECKED_BOOKS:
+        book = find_by_books_id(i)
+        if int(book[0]) == book_id:  
+            CHECKED_BOOKS.remove(book_id)
+
+            await call.message.edit_reply_markup(reply_markup=None)
+
 @user_router.callback_query(F.data.startswith("save_"))
 async def save_book_by_id(call: CallbackQuery):
     data = call.data.split("_")
@@ -197,4 +212,5 @@ async def save_book_by_id(call: CallbackQuery):
             await call.message.edit_reply_markup(reply_markup=None)
             await call.message.answer(f"{book[1]} savatchaga {count} dona sifatida qo‘shildi!")
             break
+
 

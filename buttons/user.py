@@ -129,7 +129,7 @@ def plus_minus_inline_button(book_id,count=1):
            InlineKeyboardButton(text="➕", callback_data=f"plus_{count}")
           ],
           [
-              InlineKeyboardButton(text ="Cancel",callback_data=f"cancel_{book_id}"),
+              InlineKeyboardButton(text ="Cancel",callback_data=f"delete_{book_id}"),
               InlineKeyboardButton(text ="Save",callback_data=f"save_{count}_{book_id}")
 
           ]  
