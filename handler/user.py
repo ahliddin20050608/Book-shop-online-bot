@@ -173,13 +173,13 @@ async def plus_button(call: CallbackQuery):
 @user_router.callback_query(F.data.startswith("save_"))
 async def save_book_by_id(call: CallbackQuery):
     data = call.data.split("_")
-    count = int(data[1])     
-    book_id = int(data[2])         # index 2 = book_id
+    count = int(data[1])           # save_{count}_{book_id}
+    book_id = int(data[2])         # book_id
 
     for i in CHECKED_BOOKS:
         book = find_by_books_id(i)
         if int(book[0]) == book_id:
-            book_price = int(book[4])   # Narxni butun son shaklida olamiz
+            book_price = int(book[5])   # 🟢 to‘g‘ri indeks: price ustuni
             chat_id = call.from_user.id
 
             # Kitobni bazaga saqlaymiz
@@ -188,6 +188,7 @@ async def save_book_by_id(call: CallbackQuery):
             # Tugmalarni olib tashlaymiz
             await call.message.edit_reply_markup(reply_markup=None)
 
-            # Tasdiq xabari
+            # Foydalanuvchiga xabar
             await call.message.answer(f"{book[1]} savatchaga {count} dona sifatida qo‘shildi!")
             break
+
