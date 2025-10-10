@@ -121,7 +121,7 @@ async def get_checked_books(call: CallbackQuery):
 @user_router.callback_query(F.data.startswith("minus"))
 async def minus_button(call: CallbackQuery):
      for i in CHECKED_BOOKS:
-        book = find_books(i)
+        book = find_books(i[1], i[2])
         if int(book[0]) == int(call.data.split("_")[1]):
             book_id = int(call.data.split("_")[-1])
             count = int(call.data.split("_")[1])
@@ -137,7 +137,7 @@ async def minus_button(call: CallbackQuery):
 @user_router.callback_query(F.data.startswith("plus"))
 async def plus_button(call: CallbackQuery):
     for i in CHECKED_BOOKS:
-        book = find_books(i)
+        book = find_books(i[1],i[2])
         if int(book[0]) == int(call.data.split("_")[1]):
 
             book_id = int(call.data.split("_")[-1])
