@@ -33,7 +33,7 @@ def create_table():
         status TEXT DEFAULT 'new',
         create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (book_id) REFERENCES books(id),
-        FOREIGN KEY (user_id) REFERENCES users(chat_id)
+        FOREIGN KEY (user_id) REFERENCES users(id)
     );
     """
     with get_connect() as db:
@@ -103,12 +103,25 @@ def find_by_books_id(book_id):
 def order_save_books(book_id, chat_id, quantity, price):
     try:
         with get_connect() as db:
+            # Avval foydalanuvchi ID sini olish (chat_id orqali)
+            cur = db.execute("SELECT id FROM users WHERE chat_id = ?;", (chat_id,))
+            user = cur.fetchone()
+
+            if not user:
+                print(f"❌ Xatolik: foydalanuvchi topilmadi (chat_id={chat_id})")
+                return None
+
+            user_id = user[0]
+
+            # Endi foydalanuvchi id orqali order qo‘shish
             db.execute(
                 "INSERT INTO orders (book_id, user_id, price, quantity) VALUES (?, ?, ?, ?);",
-                (book_id, chat_id, price, quantity)
+                (book_id, user_id, price, quantity)
             )
             db.commit()
+            print(f"✅ Order saqlandi: user_id={user_id}, book_id={book_id}, quantity={quantity}, price={price}")
             return True
+
     except Exception as e:
-        print("Xatolik:", e)
+        print("❌ order_save_books xatolik:", e)
         return None
