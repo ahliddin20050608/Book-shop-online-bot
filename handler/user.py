@@ -5,7 +5,7 @@ from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from buttons import menu_option_kb, search_inline_kb, menu_kb, plus_minus_inline_button
 from buttons import MENU_TEXT, SEARCH_TEXT, MAIN_TEXT
 from aiogram.types import FSInputFile
-from database import find_books, find_by_books_id
+from database import find_books, find_by_books_id, order_save_books
 from states import SearchBook 
 from filter import get_all_books
 import os
@@ -133,13 +133,33 @@ async def minus_button(call: CallbackQuery):
 
 @user_router.callback_query(F.data.startswith("plus"))
 async def plus_button(call: CallbackQuery):
-    book_id = int(call.data.split("_")[-1])
-    count = int(call.data.split("_")[1])
-    
-    if count >= 10:
-        await call.message.answer("10 tadan ortiq yuborish mumkin emas.")
-    else:
-        count += 1
-        await call.message.edit_reply_markup(
-            reply_markup=plus_minus_inline_button(book_id, count)
-        )
+    for i in CHECKED_BOOKS:
+        book = find_books(i)
+        if int(book[0]) == int(call.data.split("_")[1]):
+
+            book_id = int(call.data.split("_")[-1])
+            count = int(call.data.split("_")[1])
+            
+            if count >= 10:
+                await call.message.answer("10 tadan ortiq yuborish mumkin emas.")
+            else:
+                count += 1
+                await call.message.edit_reply_markup(
+                    reply_markup=plus_minus_inline_button(book_id, count)
+                )
+
+@user_router.callback_query(F.data.startswith("save_"))
+async def save_book_by_id(call:CallbackQuery):
+     for i in CHECKED_BOOKS:
+        book = find_books(i)
+        if int(book[0]) == int(call.data.split("_")[1]):
+            count = call.data.split("_")[1]
+            book_id = int(call.data.split("_")[-1])
+            book_price = find_by_books_id(book_id)[4]
+            chat_id = call.from_user.id
+            
+
+            order_save_books(book_id, chat_id, count, book_price)
+
+            await call.message.edit_reply_markup("",reply_markup=None)
+            
