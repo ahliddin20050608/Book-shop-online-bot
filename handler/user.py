@@ -154,7 +154,7 @@ async def plus_button(call: CallbackQuery):
 @user_router.callback_query(F.data.startswith("save_"))
 async def save_book_by_id(call:CallbackQuery):
      for i in CHECKED_BOOKS:
-        book = find_books(i)
+        book = find_books(i[1],i[2])
         if int(book[0]) == call.data.split("_")[1]:
             count = call.data.split("_")[1]
             book_id = int(call.data.split("_")[-1])
