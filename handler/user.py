@@ -137,7 +137,7 @@ async def minus_button(call: CallbackQuery):
     if not book_id:
         await call.answer("Book ID topilmadi!", show_alert=True)
         return
-    if count < 1:
+    if count <= 1:
         await call.answer("Kamaytirish mumkin emas!", show_alert=True)
         return
     count -= 1
@@ -170,19 +170,24 @@ async def plus_button(call: CallbackQuery):
     await call.message.edit_reply_markup(
         reply_markup=plus_minus_inline_button(book_id, count)
     )
-
 @user_router.callback_query(F.data.startswith("save_"))
-async def save_book_by_id(call:CallbackQuery):
-     for i in CHECKED_BOOKS:
-        book = find_by_books_id(i)
-        if int(book[0]) == call.data.split("_")[1]:
-            count = call.data.split("_")[1]
-            book_id = int(call.data.split("_")[-1])
-            book_price = find_by_books_id(book_id)[4]
-            chat_id = call.from_user.id
-            
+async def save_book_by_id(call: CallbackQuery):
+    data = call.data.split("_")
+    count = int(data[1])     
+    book_id = int(data[2])         # index 2 = book_id
 
+    for i in CHECKED_BOOKS:
+        book = find_by_books_id(i)
+        if int(book[0]) == book_id:
+            book_price = int(book[4])   # Narxni butun son shaklida olamiz
+            chat_id = call.from_user.id
+
+            # Kitobni bazaga saqlaymiz
             order_save_books(book_id, chat_id, count, book_price)
 
+            # Tugmalarni olib tashlaymiz
             await call.message.edit_reply_markup(reply_markup=None)
-            
+
+            # Tasdiq xabari
+            await call.message.answer(f"{book[1]} savatchaga {count} dona sifatida qo‘shildi!")
+            break

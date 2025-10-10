@@ -102,8 +102,12 @@ def find_by_books_id(book_id):
 def order_save_books(book_id, chat_id, quantity, price):
     try:
         with get_connect() as db:
-            db.execute("INSERT INTO orders (book_id,user_id, price, quantitiy) VALUES(?,?,?,?);", (book_id, chat_id, price, quantity))
+            db.execute(
+                "INSERT INTO orders (book_id, user_id, price, quantity) VALUES (?, ?, ?, ?);",
+                (book_id, chat_id, price, quantity)
+            )
             db.commit()
             return True
     except Exception as e:
+        print("Xatolik:", e)
         return None
