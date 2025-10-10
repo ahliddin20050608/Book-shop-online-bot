@@ -143,7 +143,7 @@ async def plus_button(call: CallbackQuery):
             book_id = int(call.data.split("_")[-1])
             count = int(call.data.split("_")[1])
             
-            if count >= 10:
+            if count > 10:
                 await call.message.answer("10 tadan ortiq yuborish mumkin emas.")
             else:
                 count += 1
