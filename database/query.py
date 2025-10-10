@@ -88,11 +88,10 @@ def find_books(kind: str, text: str):
         print("❌ find_books xatolik:", e)
         return []
 
-
 def find_by_books_id(book_id):
     try:
         with get_connect() as db:
-            cur = db.execute("SELECT id, title, author, genre FROM books WHERE id = ?;", (book_id,))
+            cur = db.execute("SELECT * FROM books WHERE id = ?;", (book_id,))
             return cur.fetchone()
     except Exception as e:
         print("❌ find_by_books_id xatolik:", e)
