@@ -120,28 +120,9 @@ async def get_checked_books(call: CallbackQuery):
 
 @user_router.callback_query(F.data.startswith("minus"))
 async def minus_button(call: CallbackQuery):
-     for i in CHECKED_BOOKS:
-        book = find_by_books_id(i)
-        if int(book[0]) == int(call.data.split("_")[1]):
-            book_id = int(call.data.split("_")[-1])
-            count = int(call.data.split("_")[1])
-            
-            if count <= 1:
-                await call.message.answer("Kamaytirish mumkin emas.")
-            else:
-                count -= 1
-                await call.message.edit_reply_markup(
-                    reply_markup=plus_minus_inline_button(book_id, count)
-                )
-@user_router.callback_query(F.data.startswith("plus"))
-async def plus_button(call: CallbackQuery):
     data = call.data.split("_")
-    count = int(data[1])  # faqat sonni olamiz
-
-    # endi book_id ni xabar (message) markup ichidan topamiz
-    # markup callbacklaridan 'save_' bilan boshlanadiganini izlaymiz
+    count = int(data[1])
     markup = call.message.reply_markup.inline_keyboard
-
     book_id = None
     for row in markup:
         for btn in row:
@@ -153,24 +134,42 @@ async def plus_button(call: CallbackQuery):
                 break
         if book_id:
             break
-
     if not book_id:
         await call.answer("Book ID topilmadi!", show_alert=True)
         return
-
-    # Limit tekshiruvi
-    if count >= 10:
-        await call.answer("10 tadan ortiq yuborish mumkin emas!", show_alert=True)
+    if count < 1:
+        await call.answer("Kamaytirish mumkin emas!", show_alert=True)
         return
-
-    # 1 taga oshiramiz
-    count += 1
-
-    # keyboard yangilanadi
+    count -= 1
     await call.message.edit_reply_markup(
         reply_markup=plus_minus_inline_button(book_id, count)
     )
 
+@user_router.callback_query(F.data.startswith("plus"))
+async def plus_button(call: CallbackQuery):
+    data = call.data.split("_")
+    count = int(data[1])  
+    markup = call.message.reply_markup.inline_keyboard
+    book_id = None
+    for row in markup:
+        for btn in row:
+            if btn.callback_data.startswith("save_"):
+                parts = btn.callback_data.split("_")
+                if len(parts) == 3:
+                    book_id = int(parts[2])
+                break
+        if book_id:
+            break
+    if not book_id:
+        await call.answer("Book ID topilmadi!", show_alert=True)
+        return
+    if count >= 10:
+        await call.answer("10 tadan ortiq yuborish mumkin emas!", show_alert=True)
+        return
+    count += 1
+    await call.message.edit_reply_markup(
+        reply_markup=plus_minus_inline_button(book_id, count)
+    )
 
 @user_router.callback_query(F.data.startswith("save_"))
 async def save_book_by_id(call:CallbackQuery):
