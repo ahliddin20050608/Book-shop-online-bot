@@ -136,20 +136,24 @@ async def minus_button(call: CallbackQuery):
 
 @user_router.callback_query(F.data.startswith("plus"))
 async def plus_button(call: CallbackQuery):
+    data = call.data.split("_")
+    count = int(data[1])
+    book_id = int(data[2])
+
     for i in CHECKED_BOOKS:
         book = find_by_books_id(i)
-        if int(book[0]) == int(call.data.split("_")[1]):
+        if int(book[0]) == book_id:  
 
-            book_id = int(call.data.split("_")[-1])
-            count = int(call.data.split("_")[1])
-            
-            if count > 10:
-                await call.message.answer("10 tadan ortiq yuborish mumkin emas.")
-            else:
-                count += 1
-                await call.message.edit_reply_markup(
-                    reply_markup=plus_minus_inline_button(book_id, count)
-                )
+            if count >= 10:
+                await call.answer("10 tadan ortiq yuborish mumkin emas!", show_alert=True)
+                return
+
+            count += 1
+            await call.message.edit_reply_markup(
+                reply_markup=plus_minus_inline_button(book_id, count)
+            )
+            break
+
 
 @user_router.callback_query(F.data.startswith("save_"))
 async def save_book_by_id(call:CallbackQuery):
