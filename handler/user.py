@@ -133,26 +133,43 @@ async def minus_button(call: CallbackQuery):
                 await call.message.edit_reply_markup(
                     reply_markup=plus_minus_inline_button(book_id, count)
                 )
-
 @user_router.callback_query(F.data.startswith("plus"))
 async def plus_button(call: CallbackQuery):
     data = call.data.split("_")
-    count = int(data[1])
-    book_id = int(data[2])
+    count = int(data[1])  # faqat sonni olamiz
 
-    for i in CHECKED_BOOKS:
-        book = find_by_books_id(i)
-        if int(book[0]) == book_id:  
+    # endi book_id ni xabar (message) markup ichidan topamiz
+    # markup callbacklaridan 'save_' bilan boshlanadiganini izlaymiz
+    markup = call.message.reply_markup.inline_keyboard
 
-            if count >= 10:
-                await call.answer("10 tadan ortiq yuborish mumkin emas!", show_alert=True)
-                return
-
-            count += 1
-            await call.message.edit_reply_markup(
-                reply_markup=plus_minus_inline_button(book_id, count)
-            )
+    book_id = None
+    for row in markup:
+        for btn in row:
+            if btn.callback_data.startswith("save_"):
+                # save_{count}_{book_id} -> bo‘lib kesamiz
+                parts = btn.callback_data.split("_")
+                if len(parts) == 3:
+                    book_id = int(parts[2])
+                break
+        if book_id:
             break
+
+    if not book_id:
+        await call.answer("Book ID topilmadi!", show_alert=True)
+        return
+
+    # Limit tekshiruvi
+    if count >= 10:
+        await call.answer("10 tadan ortiq yuborish mumkin emas!", show_alert=True)
+        return
+
+    # 1 taga oshiramiz
+    count += 1
+
+    # keyboard yangilanadi
+    await call.message.edit_reply_markup(
+        reply_markup=plus_minus_inline_button(book_id, count)
+    )
 
 
 @user_router.callback_query(F.data.startswith("save_"))
