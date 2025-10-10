@@ -1,7 +1,6 @@
 import sqlite3
 from .connect import get_connect
 
-
 def create_table():
     sql = """
     CREATE TABLE IF NOT EXISTS users(
@@ -42,7 +41,6 @@ def create_table():
 
 create_table()
 
-
 def save_user(chat_id, fullname, phone, username=None, is_admin=0):
     sql = """
     INSERT OR IGNORE INTO users (chat_id, name, user_name, phone, is_admin)
@@ -50,15 +48,12 @@ def save_user(chat_id, fullname, phone, username=None, is_admin=0):
     """
     try:
         with get_connect() as db:
-            # to'g'ri ketma-ketlik: chat_id, name, user_name, phone, is_admin
             db.execute(sql, (chat_id, fullname, username, phone, is_admin))
             db.commit()
         return True
     except Exception as e:
         print("❌ save_user xatolik:", e)
         return None
-
-
 
 def is_register_by_chat_id(chat_id: int):
     try:
@@ -67,9 +62,7 @@ def is_register_by_chat_id(chat_id: int):
             cur = db.execute(sql, (chat_id,))
             return cur.fetchone()
     except Exception as e:
-        print("❌ is_register_by_chat_id xatolik:", e)
         return None
-
 
 def find_books(kind: str, text: str):
     try:
@@ -85,7 +78,6 @@ def find_books(kind: str, text: str):
 
             return cur.fetchall()
     except Exception as e:
-        print("❌ find_books xatolik:", e)
         return []
 
 def find_by_books_id(book_id):
@@ -97,31 +89,25 @@ def find_by_books_id(book_id):
         print("❌ find_by_books_id xatolik:", e)
         return None
 
-
-
-
 def order_save_books(book_id, chat_id, quantity, price):
     try:
         with get_connect() as db:
-            # Avval foydalanuvchi ID sini olish (chat_id orqali)
             cur = db.execute("SELECT id FROM users WHERE chat_id = ?;", (chat_id,))
             user = cur.fetchone()
 
             if not user:
-                print(f"❌ Xatolik: foydalanuvchi topilmadi (chat_id={chat_id})")
+                print(f"Xatolik: foydalanuvchi topilmadi (chat_id={chat_id})")
                 return None
 
             user_id = user[0]
 
-            # Endi foydalanuvchi id orqali order qo‘shish
             db.execute(
                 "INSERT INTO orders (book_id, user_id, price, quantity) VALUES (?, ?, ?, ?);",
                 (book_id, user_id, price, quantity)
             )
             db.commit()
-            print(f"✅ Order saqlandi: user_id={user_id}, book_id={book_id}, quantity={quantity}, price={price}")
+            print(f"Order saqlandi: user_id={user_id}, book_id={book_id}, quantity={quantity}, price={price}")
             return True
 
-    except Exception as e:
-        print("❌ order_save_books xatolik:", e)
+    except:
         return None
