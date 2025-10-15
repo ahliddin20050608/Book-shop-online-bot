@@ -42,7 +42,7 @@ async def back_menu(message:Message):
         await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup= register_kb)
 
 
-    await message.answer(" ",reply_markup=search_inline_kb)
+    await message.answer(" .",reply_markup=search_inline_kb)
 
 @user_router.callback_query(F.data.startswith("search"))
 async def search_query(call:CallbackQuery, state:FSMContext):

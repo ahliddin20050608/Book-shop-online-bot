@@ -111,3 +111,24 @@ def order_save_books(book_id, chat_id, quantity, price):
 
     except:
         return None
+    
+def list_tables():
+    with get_connect() as db:
+        dbc = db.execute("SELECT name FROM sqlite_master WHERE type ='table';") 
+        return dbc.fetchall()
+
+def all_users():
+    with get_connect() as db:
+        dbc = db.execute("SELECT*FROM users")
+        return dbc.fetchall()
+
+def all_books():
+    with get_connect() as db:
+        dbc = db.execute("SELECT*FROM books")
+        return dbc.fetchall()
+    
+
+def all_orders():
+    with get_connect() as db:
+        dbc = db.execute("SELECT*FROM orders")
+        return dbc.fetchall()
