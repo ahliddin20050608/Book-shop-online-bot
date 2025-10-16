@@ -9,51 +9,46 @@ from database import find_books, find_by_books_id, order_save_books, is_register
 from states import SearchBook 
 from filter import get_all_books
 import os
+
 user_router = Router()
 
-
 photo_path = "images/image.png"
-
 CHECKED_BOOKS = []
+
 @user_router.message(F.text=="📚 Menu")
 async def user_menu_handler(message:Message):
     if is_register_by_chat_id(message.from_user.id):
         photo = "images/menu.webp"
-
         await message.answer_photo(photo=FSInputFile(path=photo), caption=MENU_TEXT, reply_markup=menu_option_kb)
     else:
-        photo_path = "images/image.png"
-        await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup= register_kb)
+        await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup=register_kb)
 
 @user_router.message(F.text=="🔍 Search")
 async def search_choice(message:Message):
     if is_register_by_chat_id(message.from_user.id):
-        await  message.answer(text=SEARCH_TEXT, reply_markup=search_inline_kb)
+        await message.answer(text=SEARCH_TEXT, reply_markup=search_inline_kb)
     else:
-        await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup= register_kb)
+        await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup=register_kb)
 
 @user_router.message(F.text=="↩️ Back")
 async def back_menu(message:Message):
     if is_register_by_chat_id(message.from_user.id):
         photo = "images/menu.webp"
-
         await message.answer_photo(photo=FSInputFile(path=photo), caption=MAIN_TEXT, reply_markup=menu_kb)
     else:
-        await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup= register_kb)
+        await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup=register_kb)
 
-
-    await message.answer(" .",reply_markup=search_inline_kb)
+    await message.answer(" .", reply_markup=search_inline_kb)
 
 @user_router.callback_query(F.data.startswith("search"))
-async def search_query(call:CallbackQuery, state:FSMContext):
+async def search_query_handler(call:CallbackQuery, state:FSMContext):
     await state.set_state(SearchBook.search_name)
     data = call.data.split("_")[-1]
-    await state.update_data(name = data)
+    await state.update_data(name=data)
     await state.set_state(SearchBook.text)
-    if data !="back":
+    if data != "back":
         await call.message.edit_reply_markup(None)
         await call.message.answer(f"{data.title()} kiriting:")
-
     else:
         await state.clear()
         await call.message.edit_reply_markup(None)
@@ -61,68 +56,63 @@ async def search_query(call:CallbackQuery, state:FSMContext):
         await call.message.answer_photo(photo=FSInputFile(path=photo), caption=MENU_TEXT, reply_markup=menu_option_kb)
 
 @user_router.message(SearchBook.text)
-async def get_search_books(message:Message,state:FSMContext):
-    if is_register_by_chat_id(message.from_user.id):    
-        search_name = await state.get_data()
-        search_name = search_name.get("name")
-        data = get_all_books(search_name = search_name, text = message.text)
-        if data :
+async def get_search_books(message:Message, state:FSMContext):
+    if is_register_by_chat_id(message.from_user.id):
+        search_name = (await state.get_data()).get("name")
+        data = get_all_books(search_name=search_name, text=message.text)
+        if data:
             await message.answer(text=data[0], reply_markup=data[1])
         else:
             await message.answer(f"{message.text} - bunday {search_name} bizda mavjud emas.")
     else:
-        await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup= register_kb)
+        await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup=register_kb)
 
 @user_router.callback_query(F.data.startswith("cancel_books"))
-async def back_search(call:CallbackQuery):
+async def back_search_handler(call:CallbackQuery):
     await call.message.edit_text(SEARCH_TEXT)
 
 @user_router.callback_query(F.data.startswith("next"))
-async def next_page_book(call:CallbackQuery):
+async def next_page_handler(call:CallbackQuery):
     search_name = call.data.split("_")[1]
     text = call.data.split("_")[2]
     page = int(call.data.split("_")[-1])
-
-
-    data = get_all_books(search_name = search_name, text = text, page=page)
+    data = get_all_books(search_name=search_name, text=text, page=page)
     await call.message.edit_text(text=data[0])
     await call.message.edit_reply_markup(reply_markup=data[1])
-
-
 
 @user_router.callback_query(F.data.startswith("back"))
-async def next_page_book(call:CallbackQuery):
+async def prev_page_handler(call:CallbackQuery):
     search_name = call.data.split("_")[1]
     text = call.data.split("_")[2]
     page = int(call.data.split("_")[-1])
-
-
-    data = get_all_books(search_name = search_name, text = text, page=page)
+    data = get_all_books(search_name=search_name, text=text, page=page)
     await call.message.edit_text(text=data[0])
     await call.message.edit_reply_markup(reply_markup=data[1])
 
-
-
 @user_router.callback_query(F.data.startswith("book_id"))
-async def get_checked_books(call:CallbackQuery):
+async def add_checked_book(call:CallbackQuery):
     book_id = int(call.data.split("_")[-1])
-    CHECKED_BOOKS.append(book_id)
-
+    if book_id not in CHECKED_BOOKS:
+        CHECKED_BOOKS.append(book_id)
 
 @user_router.callback_query(F.data.startswith("send_books"))
-async def get_checked_books(call: CallbackQuery):
+async def send_checked_books(call: CallbackQuery):
     if not CHECKED_BOOKS:
         await call.message.answer("📚 Hech qanday kitob tanlanmagan.")
         return
 
     for book_id in CHECKED_BOOKS:
         book = find_by_books_id(book_id)
+        if not book:
+            continue
 
-        book_file = book[-1] if book[-1] else "not_found_image.webp"
+        # book[7] dan image nomini olish va tekshirish
+        book_file = book[7] if book[7] and isinstance(book[7], str) and book[7].strip() else "not_found_image.webp"
         book_path = os.path.join("images", book_file)
 
+        # Agar image mavjud bo'lmasa, not_found_image ishlatish
         if not os.path.exists(book_path):
-            book_path = "images/not_found_image.webp"
+            book_path = os.path.join("images", "not_found_image.webp")
 
         await call.message.answer_photo(
             photo=FSInputFile(book_path),
@@ -132,9 +122,13 @@ async def get_checked_books(call: CallbackQuery):
 
 
 @user_router.callback_query(F.data.startswith("minus"))
-async def minus_button(call: CallbackQuery):
+async def minus_button_handler(call: CallbackQuery):
     data = call.data.split("_")
     count = int(data[1])
+    if not call.message.reply_markup or not call.message.reply_markup.inline_keyboard:
+        await call.answer("Markup mavjud emas!", show_alert=True)
+        return
+
     markup = call.message.reply_markup.inline_keyboard
     book_id = None
     for row in markup:
@@ -146,6 +140,7 @@ async def minus_button(call: CallbackQuery):
                 break
         if book_id:
             break
+
     if not book_id:
         await call.answer("Book ID topilmadi!", show_alert=True)
         return
@@ -153,14 +148,16 @@ async def minus_button(call: CallbackQuery):
         await call.answer("Kamaytirish mumkin emas!", show_alert=True)
         return
     count -= 1
-    await call.message.edit_reply_markup(
-        reply_markup=plus_minus_inline_button(book_id, count)
-    )
+    await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book_id, count))
 
 @user_router.callback_query(F.data.startswith("plus"))
-async def plus_button(call: CallbackQuery):
+async def plus_button_handler(call: CallbackQuery):
     data = call.data.split("_")
-    count = int(data[1])  
+    count = int(data[1])
+    if not call.message.reply_markup or not call.message.reply_markup.inline_keyboard:
+        await call.answer("Markup mavjud emas!", show_alert=True)
+        return
+
     markup = call.message.reply_markup.inline_keyboard
     book_id = None
     for row in markup:
@@ -172,6 +169,7 @@ async def plus_button(call: CallbackQuery):
                 break
         if book_id:
             break
+
     if not book_id:
         await call.answer("Book ID topilmadi!", show_alert=True)
         return
@@ -179,38 +177,31 @@ async def plus_button(call: CallbackQuery):
         await call.answer("10 tadan ortiq yuborish mumkin emas!", show_alert=True)
         return
     count += 1
-    await call.message.edit_reply_markup(
-        reply_markup=plus_minus_inline_button(book_id, count)
-    )
-
-
+    await call.message.edit_reply_markup(reply_markup=plus_minus_inline_button(book_id, count))
 
 @user_router.callback_query(F.data.startswith("delete_"))
-async def cancel_button(call:CallbackQuery): 
+async def delete_book_handler(call: CallbackQuery):
     data = call.data.split("_")
-    count = int(data[1])       
-    book_id = int(data[2])   
-    for i in CHECKED_BOOKS:
-        book = find_by_books_id(i)
-        if int(book[0]) == book_id:  
-            CHECKED_BOOKS.remove(book_id)
+    if len(data) < 2:
+        await call.answer("Book ID topilmadi!", show_alert=True)
+        return
 
-            await call.message.edit_reply_markup(reply_markup=None)
+    book_id = int(data[1])
+    if book_id in CHECKED_BOOKS:
+        CHECKED_BOOKS.remove(book_id)
+
+    await call.message.edit_reply_markup(reply_markup=None)
 
 @user_router.callback_query(F.data.startswith("save_"))
-async def save_book_by_id(call: CallbackQuery):
+async def save_book_by_id_handler(call: CallbackQuery):
     data = call.data.split("_")
-    count = int(data[1])         
-    book_id = int(data[2])         
+    count = int(data[1])
+    book_id = int(data[2])
 
-    for i in CHECKED_BOOKS:
-        book = find_by_books_id(i)
-        if int(book[0]) == book_id:
-            book_price = int(book[5])   
-            chat_id = call.from_user.id
-            order_save_books(book_id, chat_id, count, book_price)
-            await call.message.edit_reply_markup(reply_markup=None)
-            await call.message.answer(f"{book[1]} savatchaga {count} dona sifatida qo‘shildi!")
-            break
-
-
+    if book_id in CHECKED_BOOKS:
+        book = find_by_books_id(book_id)
+        book_price = int(book[5])
+        chat_id = call.from_user.id
+        order_save_books(book_id, chat_id, count, book_price)
+        await call.message.edit_reply_markup(reply_markup=None)
+        await call.message.answer(f"{book[1]} savatchaga {count} dona sifatida qo‘shildi!")
