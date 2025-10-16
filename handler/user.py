@@ -38,7 +38,7 @@ async def back_menu(message:Message):
     else:
         await message.answer_photo(photo=FSInputFile(path=photo_path), caption=REG_TEXT, reply_markup=register_kb)
 
-    await message.answer(" .", reply_markup=search_inline_kb)
+    await message.answer("Quyidagi menyudan kerakli bo‘limni tanlang 👇", reply_markup=menu_kb)
 
 @user_router.callback_query(F.data.startswith("search"))
 async def search_query_handler(call:CallbackQuery, state:FSMContext):

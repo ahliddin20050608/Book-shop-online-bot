@@ -28,7 +28,7 @@ Bu yerda sizni kutmoqda:
 💳 Qulay to‘lov usullari  
 🎁 Doimiy aksiyalar va chegirmalar  
 
-Quyidagi menyudan kerakli bo‘limni tanlang 👇
+
 """
 
 
